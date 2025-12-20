@@ -121,7 +121,7 @@ def analizar_resultados(model, history, test_loader, classes):
 # CONFIGURACIÓN Y EJECUCIÓN
 # ==========================================
 
-data_dir = "dataset3"
+data_dir = "dataset"
 NUM_CLASSES = 4
 
 train_transform = transforms.Compose([

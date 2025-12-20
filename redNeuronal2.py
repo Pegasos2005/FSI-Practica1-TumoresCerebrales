@@ -12,7 +12,7 @@ import seaborn as sns
 import numpy as np
 
 # --- 1. CONFIGURACIÓN Y CARGA DE DATOS ---
-data_dir = "dataset3"
+data_dir = "dataset"
 
 # Transformaciones
 train_transform = transforms.Compose([
