@@ -14,7 +14,7 @@ import seaborn as sns
 import numpy as np
 
 # --- Configuración del Dataset ---
-data_dir = "dataset3"  
+data_dir = "dataset3"
 # Ajustaremos num_classes dinámicamente según la carpeta
 
 # --- 1. Transformaciones ---
@@ -55,15 +55,16 @@ print("-" * 30)
 class CNN_Minimalista(nn.Module):
     def __init__(self, num_classes=5):
         super(CNN_Minimalista, self).__init__()
+
         self.features = nn.Sequential(
             nn.Conv2d(3, 8, 3, padding=1), nn.ReLU(), nn.MaxPool2d(2, 2),
             nn.Conv2d(8, 16, 3, padding=1), nn.ReLU(), nn.MaxPool2d(2, 2),
-            nn.Conv2d(16, 32, 3, padding=1), nn.ReLU(), nn.MaxPool2d(2, 2),
-            nn.Conv2d(32, 64, 3, padding=1), nn.ReLU(), nn.MaxPool2d(2, 2)
+            nn.Conv2d(16, 32, 3, padding=1), nn.ReLU(), nn.MaxPool2d(2, 2)
         )
+
         self.classifier = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(64 * 14 * 14, 256),
+            nn.Linear(32 * 28 * 28, 256),
             nn.ReLU(),
             nn.Dropout(0.5),
             nn.Linear(256, num_classes)
@@ -108,7 +109,7 @@ def train_with_validation(model, train_loader, dev_loader, criterion, optimizer,
             inputs, labels = inputs.to(device), labels.to(device)
             optimizer.zero_grad()
             outputs = model(inputs)
-            
+
             # Cálculo de Loss
             loss = criterion(outputs, labels)
             loss.backward()
@@ -122,7 +123,7 @@ def train_with_validation(model, train_loader, dev_loader, criterion, optimizer,
         # Métricas de la época
         avg_train_loss = running_loss / len(train_loader)
         train_acc = 100.0 * correct / total
-        
+
         # Validación
         model.eval()
         dev_loss_acc = 0.0
@@ -131,7 +132,7 @@ def train_with_validation(model, train_loader, dev_loader, criterion, optimizer,
                 inputs, labels = inputs.to(device), labels.to(device)
                 outputs = model(inputs)
                 dev_loss_acc += criterion(outputs, labels).item()
-        
+
         avg_dev_loss = dev_loss_acc / len(dev_loader)
         dev_acc = evaluate(model, dev_loader)
 
@@ -152,8 +153,8 @@ def analizar_resultados(model, history, test_loader, classes):
     epochs = range(1, len(history['train_loss']) + 1)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.eval()
-    
-    plt.figure(figsize=(18, 5)) 
+
+    plt.figure(figsize=(18, 5))
 
     # 1. Gráfica Loss
     plt.subplot(1, 3, 1)
@@ -176,7 +177,7 @@ def analizar_resultados(model, history, test_loader, classes):
             _, predicted = torch.max(outputs, 1)
             all_preds.extend(predicted.cpu().numpy())
             all_labels.extend(labels.numpy())
-    
+
     cm = confusion_matrix(all_labels, all_preds)
     plt.subplot(1, 3, 3)
     sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=classes, yticklabels=classes)
@@ -196,11 +197,11 @@ optimizer = optim.Adam(model.parameters(), lr=1e-3)
 # --- AQUI ESTÁ EL CAMBIO PRINCIPAL ---
 # En lugar de tu bucle 'for' manual, usamos la función que guarda el historial
 model_entrenado, historial = train_with_validation(
-    model, 
-    train_loader, 
-    val_loader, 
-    criterion, 
-    optimizer, 
+    model,
+    train_loader,
+    val_loader,
+    criterion,
+    optimizer,
     epochs=7
 )
 
@@ -213,7 +214,7 @@ torch.save(model_entrenado.state_dict(), model_save_path)
 print(f"\nModelo guardado en: {model_save_path}")
 
 # Ejemplo de predicción
-img_path = os.path.join(data_dir, classes[0], "G_1_BR.jpg") 
+img_path = os.path.join(data_dir, classes[0], "G_1_BR.jpg")
 if os.path.exists(img_path):
     print(f"Probando predicción con: {img_path}")
     img = Image.open(img_path).convert("RGB")

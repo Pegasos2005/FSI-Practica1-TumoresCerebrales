@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Carga del dataset
-data_dir = "dataset3"
+data_dir = "dataset"
 
 # Transformacion (Standard ImageNet)
 transformacion_comun = transforms.Compose([
@@ -76,7 +76,7 @@ def train_with_validation(model, train_loader, dev_loader, criterion, optimizer,
             inputs, labels = inputs.to(device), labels.to(device)
             optimizer.zero_grad()
             outputs = model(inputs)
-            
+
             loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()
@@ -89,7 +89,7 @@ def train_with_validation(model, train_loader, dev_loader, criterion, optimizer,
         # Métricas
         avg_train_loss = running_loss / len(train_loader)
         train_acc = 100.0 * correct / total
-        
+
         # Validación
         model.eval()
         dev_loss_acc = 0.0
@@ -98,7 +98,7 @@ def train_with_validation(model, train_loader, dev_loader, criterion, optimizer,
                 inputs, labels = inputs.to(device), labels.to(device)
                 outputs = model(inputs)
                 dev_loss_acc += criterion(outputs, labels).item()
-        
+
         avg_dev_loss = dev_loss_acc / len(dev_loader)
         dev_acc = evaluate(model, dev_loader)
 
@@ -118,8 +118,8 @@ def analizar_resultados(model, history, test_loader, classes):
     epochs = range(1, len(history['train_loss']) + 1)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.eval()
-    
-    plt.figure(figsize=(18, 5)) 
+
+    plt.figure(figsize=(18, 5))
 
     # 1. Gráfica Loss
     plt.subplot(1, 3, 1)
@@ -142,7 +142,7 @@ def analizar_resultados(model, history, test_loader, classes):
             _, predicted = torch.max(outputs, 1)
             all_preds.extend(predicted.cpu().numpy())
             all_labels.extend(labels.numpy())
-    
+
     cm = confusion_matrix(all_labels, all_preds)
     plt.subplot(1, 3, 3)
     sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=classes, yticklabels=classes)
@@ -175,13 +175,15 @@ optimizer = optim.Adam(model.parameters(), lr=1e-4)
 # --- 3. ENTRENAMIENTO (Usando las funciones nuevas) ---
 # Ejecutamos el entrenamiento y guardamos el historial
 model_entrenado, historial = train_with_validation(
-    model, 
-    train_loader, 
-    val_loader, 
-    criterion, 
-    optimizer, 
+    model,
+    train_loader,
+    val_loader,
+    criterion,
+    optimizer,
     epochs=7
 )
+
+
 
 # --- 4. ANÁLISIS VISUAL ---
 # Genera las gráficas y la matriz de confusión automáticamente

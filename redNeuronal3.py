@@ -7,15 +7,13 @@ from torch.utils.data import DataLoader, random_split
 from PIL import Image
 import os
 
-# --- IMPORTACIONES NUEVAS NECESARIAS ---
 from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 
 # --- Configuración del Dataset ---
-data_dir = "dataset3"  
-# Ajustaremos num_classes dinámicamente según la carpeta
+data_dir = "dataset3"
 
 # --- 1. Transformaciones ---
 train_transform = transforms.Compose([
@@ -108,7 +106,7 @@ def train_with_validation(model, train_loader, dev_loader, criterion, optimizer,
             inputs, labels = inputs.to(device), labels.to(device)
             optimizer.zero_grad()
             outputs = model(inputs)
-            
+
             # Cálculo de Loss
             loss = criterion(outputs, labels)
             loss.backward()
@@ -122,7 +120,7 @@ def train_with_validation(model, train_loader, dev_loader, criterion, optimizer,
         # Métricas de la época
         avg_train_loss = running_loss / len(train_loader)
         train_acc = 100.0 * correct / total
-        
+
         # Validación
         model.eval()
         dev_loss_acc = 0.0
@@ -131,7 +129,7 @@ def train_with_validation(model, train_loader, dev_loader, criterion, optimizer,
                 inputs, labels = inputs.to(device), labels.to(device)
                 outputs = model(inputs)
                 dev_loss_acc += criterion(outputs, labels).item()
-        
+
         avg_dev_loss = dev_loss_acc / len(dev_loader)
         dev_acc = evaluate(model, dev_loader)
 
@@ -152,8 +150,8 @@ def analizar_resultados(model, history, test_loader, classes):
     epochs = range(1, len(history['train_loss']) + 1)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.eval()
-    
-    plt.figure(figsize=(18, 5)) 
+
+    plt.figure(figsize=(18, 5))
 
     # 1. Gráfica Loss
     plt.subplot(1, 3, 1)
@@ -176,7 +174,7 @@ def analizar_resultados(model, history, test_loader, classes):
             _, predicted = torch.max(outputs, 1)
             all_preds.extend(predicted.cpu().numpy())
             all_labels.extend(labels.numpy())
-    
+
     cm = confusion_matrix(all_labels, all_preds)
     plt.subplot(1, 3, 3)
     sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=classes, yticklabels=classes)
@@ -192,19 +190,15 @@ def analizar_resultados(model, history, test_loader, classes):
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=1e-3)
-
-# --- AQUI ESTÁ EL CAMBIO PRINCIPAL ---
-# En lugar de tu bucle 'for' manual, usamos la función que guarda el historial
 model_entrenado, historial = train_with_validation(
-    model, 
-    train_loader, 
-    val_loader, 
-    criterion, 
-    optimizer, 
+    model,
+    train_loader,
+    val_loader,
+    criterion,
+    optimizer,
     epochs=7
 )
 
-# --- LLAMADA A LA FUNCIÓN MÁGICA ---
 analizar_resultados(model_entrenado, historial, val_loader, classes)
 
 # --- 7. Guardar y Predecir ---
@@ -213,7 +207,7 @@ torch.save(model_entrenado.state_dict(), model_save_path)
 print(f"\nModelo guardado en: {model_save_path}")
 
 # Ejemplo de predicción
-img_path = os.path.join(data_dir, classes[0], "G_1_BR.jpg") 
+img_path = os.path.join(data_dir, classes[0], "G_1_BR.jpg")
 if os.path.exists(img_path):
     print(f"Probando predicción con: {img_path}")
     img = Image.open(img_path).convert("RGB")
